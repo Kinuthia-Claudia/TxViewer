@@ -1,4 +1,5 @@
 import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   SafeAreaView,
   FlatList,
@@ -6,13 +7,17 @@ import {
   ActivityIndicator,
   StyleSheet,
   View,
+  TouchableOpacity,
 } from "react-native";
-import { useTransactions } from "./src/hooks/view_transactions";
+import { useTransactions } from "./src/hooks/use_transactions";
+import { ApiSwitcher } from "./src/components/api_switcher";
 
-export default function App() {
-  const { transactions, loading, error } = useTransactions();
+const queryClient = new QueryClient();
 
-  // 1. Loading
+function HomeScreen() {
+  const { transactions, loading, error, source, setSource, refetch } =
+    useTransactions();
+
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
@@ -22,19 +27,21 @@ export default function App() {
     );
   }
 
-  // 2. Error
   if (error) {
     return (
       <SafeAreaView style={styles.center}>
         <Text style={styles.error}>{error}</Text>
+        <TouchableOpacity onPress={() => refetch()} style={styles.retry}>
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  // 3. Success - show the list
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Transactions</Text>
+      <ApiSwitcher current={source} onChange={setSource} />
       <FlatList
         data={transactions}
         keyExtractor={(item) => item.id}
@@ -42,6 +49,7 @@ export default function App() {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <Text>${item.amount.toFixed(2)}</Text>
+            <Text style={styles.source}>Source: {item.source}</Text>
           </View>
         )}
       />
@@ -49,15 +57,31 @@ export default function App() {
   );
 }
 
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <HomeScreen />
+    </QueryClientProvider>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 12 },
-  error: { color: "red" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
+  title: { fontSize: 20, fontWeight: "bold", marginBottom: 12, textAlign: "center" },
+  error: { color: "red", fontSize: 16 },
+  retry: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#007AFF",
+    borderRadius: 6,
+  },
+  retryText: { color: "#fff" },
   card: {
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
   cardTitle: { fontSize: 14, fontWeight: "600" },
+  source: { fontSize: 11, color: "#888", marginTop: 2 },
 });
