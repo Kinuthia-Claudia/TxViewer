@@ -1,7 +1,7 @@
 import { Transaction } from "../models/transaction";
 
 type JsonPlaceholderPost = {
-  userId: number;
+
   id: number;
   title: string;
   body: string;
