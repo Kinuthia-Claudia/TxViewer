@@ -1,0 +1,1 @@
+export { mapJsonPlaceholder } from "./jsonplaceholder_adapter";
