@@ -6,6 +6,7 @@ import { mapFakestore } from "../adapters/fakestore_adapter";
 import { ApiSource } from "../api/endpoints";
 import { Transaction } from "../models/transaction";
 import { useStore } from "../store/use_store";
+import { getErrorMessage } from "../utils/error_handler";
 
 const adapters: Record<ApiSource, (data: any) => Transaction[]> = {
   jsonplaceholder: mapJsonPlaceholder,
@@ -29,7 +30,7 @@ export const useTransactions = () => {
   return {
     transactions: query.data ?? [],
     loading: query.isLoading,
-    error: query.error?.message ?? null,
+    error: query.error ? getErrorMessage(query.error) : null,
     source: selectedSource,
     setSource,
     refetch: query.refetch,
