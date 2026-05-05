@@ -1,19 +1,38 @@
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   SafeAreaView,
   Text,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
+  Switch,
+  View,
 } from "react-native";
 import { useBiometricAuth } from "../src/hooks/useBioAuth";
 
 export default function AuthScreen() {
-  const { isAvailable, error, authenticate } = useBiometricAuth();
+  const { isAuthenticated, isAvailable, error, isChecking, authenticate } =
+    useBiometricAuth();
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/home");
+    }
+  }, [isAuthenticated]);
 
   const handleAuth = async () => {
-    await authenticate();
-    router.replace("/home");
+    await authenticate(rememberMe);
   };
+
+  if (isChecking) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator size="large" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.center}>
@@ -25,6 +44,11 @@ export default function AuthScreen() {
           Biometric authentication not available on this device.
         </Text>
       )}
+
+      <View style={styles.rememberRow}>
+        <Text>Remember me</Text>
+        <Switch value={rememberMe} onValueChange={setRememberMe} />
+      </View>
 
       <TouchableOpacity
         style={[styles.authButton, !isAvailable && styles.disabled]}
@@ -51,6 +75,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold" },
   subtitle: { fontSize: 14, color: "#888", marginBottom: 24 },
   warning: { fontSize: 13, color: "#FF9500", textAlign: "center", marginBottom: 12 },
+  rememberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
   authButton: {
     backgroundColor: "#007AFF",
     paddingHorizontal: 40,
