@@ -1,4 +1,3 @@
-import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   SafeAreaView,
@@ -9,12 +8,12 @@ import {
   View,
   TouchableOpacity,
 } from "react-native";
-import { useTransactions } from "./src/hooks/use_transactions";
-import { ApiSwitcher } from "./src/components/api_switcher";
+import { useTransactions } from "../src/hooks/useTransactions";
+import { ApiSwitcher } from "../src/components/api_switcher";
 
 const queryClient = new QueryClient();
 
-function HomeScreen() {
+function HomeContent() {
   const { transactions, loading, error, source, setSource, refetch } =
     useTransactions();
 
@@ -57,10 +56,10 @@ function HomeScreen() {
   );
 }
 
-export default function App() {
+export default function HomeScreen() {
   return (
     <QueryClientProvider client={queryClient}>
-      <HomeScreen />
+      <HomeContent />
     </QueryClientProvider>
   );
 }
