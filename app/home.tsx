@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTransactions } from "../src/hooks/useTransactions";
 import { ApiSwitcher } from "../src/components/api_switcher";
+import { EmptyState } from "../src/components/empty_state";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,18 @@ function HomeContent() {
     );
   }
 
+
+// ... inside HomeContent, after error if-block, add:
+
+  if (!loading && !error && transactions.length === 0) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <Text style={styles.title}>Transactions</Text>
+        <ApiSwitcher current={source} onChange={setSource} />
+        <EmptyState onRetry={() => refetch()} />
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Transactions</Text>
