@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   SafeAreaView,
@@ -10,19 +11,25 @@ import {
 } from "react-native";
 import { useTransactions } from "../src/hooks/useTransactions";
 import { ApiSwitcher } from "../src/components/api_switcher";
-import { EmptyState } from "../src/components/empty_state";
+import { useBiometricAuth } from "../src/hooks/useBioAuth";
 
 const queryClient = new QueryClient();
 
 function HomeContent() {
   const { transactions, loading, error, source, setSource, refetch } =
     useTransactions();
+  const { logout } = useBiometricAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/auth");
+  };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text>Loading transactions...</Text>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Loading transactions...</Text>
       </SafeAreaView>
     );
   }
@@ -30,38 +37,55 @@ function HomeContent() {
   if (error) {
     return (
       <SafeAreaView style={styles.center}>
-        <Text style={styles.error}>{error}</Text>
-        <TouchableOpacity onPress={() => refetch()} style={styles.retry}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-
-// ... inside HomeContent, after error if-block, add:
-
-  if (!loading && !error && transactions.length === 0) {
+  if (transactions.length === 0) {
     return (
-      <SafeAreaView style={styles.center}>
-        <Text style={styles.title}>Transactions</Text>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>TxViewer</Text>
+          <TouchableOpacity onPress={handleLogout}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
         <ApiSwitcher current={source} onChange={setSource} />
-        <EmptyState onRetry={() => refetch()} />
+        <View style={styles.center}>
+          <Text style={styles.emptyText}>No transactions found</Text>
+          <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
+            <Text style={styles.retryText}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Transactions</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>TxViewer</Text>
+        <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
       <ApiSwitcher current={source} onChange={setSource} />
       <FlatList
         data={transactions}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `${item.source}-${item.id}`}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text>${item.amount.toFixed(2)}</Text>
-            <Text style={styles.source}>Source: {item.source}</Text>
+            <Text style={styles.cardTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <View style={styles.cardBottom}>
+              <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
+              <Text style={styles.source}>{item.source}</Text>
+            </View>
           </View>
         )}
       />
@@ -78,22 +102,42 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 12, textAlign: "center" },
-  error: { color: "red", fontSize: 16 },
-  retry: {
+  container: { flex: 1, backgroundColor: "#f5f5f5", paddingTop: 60 },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+    padding: 24,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    marginBottom: 8,
+  },
+  headerTitle: { fontSize: 24, fontWeight: "700" },
+  logoutText: { fontSize: 14, color: "#FF3B30", fontWeight: "600" },
+  loadingText: { fontSize: 14, color: "#888" },
+  errorText: { color: "red", fontSize: 15, textAlign: "center" },
+  emptyText: { fontSize: 15, color: "#888" },
+  retryButton: {
     backgroundColor: "#007AFF",
-    borderRadius: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
-  retryText: { color: "#fff" },
+  retryText: { color: "#fff", fontWeight: "600" },
   card: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    backgroundColor: "#fff",
+    padding: 14,
+    marginHorizontal: 12,
+    marginVertical: 5,
+    borderRadius: 8,
   },
-  cardTitle: { fontSize: 14, fontWeight: "600" },
-  source: { fontSize: 11, color: "#888", marginTop: 2 },
+  cardTitle: { fontSize: 15, fontWeight: "600", marginBottom: 6 },
+  cardBottom: { flexDirection: "row", justifyContent: "space-between" },
+  amount: { fontSize: 16, fontWeight: "700", color: "#007AFF" },
+  source: { fontSize: 12, color: "#888" },
 });

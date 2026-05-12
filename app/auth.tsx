@@ -28,66 +28,94 @@ export default function AuthScreen() {
 
   if (isChecking) {
     return (
-      <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" />
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#007AFF" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.center}>
-      <Text style={styles.title}>TxViewer</Text>
-      <Text style={styles.subtitle}>Secure Transactions Viewer</Text>
-
-      {!isAvailable && (
-        <Text style={styles.warning}>
-          Biometric authentication not available on this device.
-        </Text>
-      )}
-
-      <View style={styles.rememberRow}>
-        <Text>Remember me</Text>
-        <Switch value={rememberMe} onValueChange={setRememberMe} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.top}>
+        <Text style={styles.icon}>🔐</Text>
+        <Text style={styles.title}>TxViewer</Text>
+        <Text style={styles.subtitle}>Secure Transactions Viewer</Text>
       </View>
 
-      <TouchableOpacity
-        style={[styles.authButton, !isAvailable && styles.disabled]}
-        onPress={handleAuth}
-      >
-        <Text style={styles.authButtonText}>
-          {isAvailable ? "Authenticate" : "Enter App"}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.bottom}>
+        {!isAvailable && (
+          <Text style={styles.warning}>
+            Biometric authentication not available on this device.
+          </Text>
+        )}
 
-      {error && <Text style={styles.error}>{error}</Text>}
+        <View style={styles.rememberRow}>
+          <Text style={styles.rememberText}>Remember me</Text>
+          <Switch
+            value={rememberMe}
+            onValueChange={setRememberMe}
+            trackColor={{ false: "#ddd", true: "#007AFF" }}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.button, !isAvailable && styles.buttonDisabled]}
+          onPress={handleAuth}
+        >
+          <Text style={styles.buttonText}>
+            {isAvailable ? "Authenticate" : "Enter App"}
+          </Text>
+        </TouchableOpacity>
+
+        {error && <Text style={styles.error}>{error}</Text>}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
+  container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 12,
+    backgroundColor: "#f5f5f7",
     padding: 24,
   },
-  title: { fontSize: 28, fontWeight: "bold" },
-  subtitle: { fontSize: 14, color: "#888", marginBottom: 24 },
-  warning: { fontSize: 13, color: "#FF9500", textAlign: "center", marginBottom: 12 },
+  top: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  icon: { fontSize: 64, marginBottom: 16 },
+  title: { fontSize: 32, fontWeight: "800", color: "#1a1a1a" },
+  subtitle: { fontSize: 14, color: "#888", marginTop: 8 },
+  bottom: {
+    width: "100%",
+    alignItems: "center",
+    paddingBottom: 40,
+  },
+  warning: {
+    fontSize: 13,
+    color: "#FF9500",
+    textAlign: "center",
+    marginBottom: 16,
+  },
   rememberRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 20,
   },
-  authButton: {
+  rememberText: { fontSize: 14, color: "#555" },
+  button: {
     backgroundColor: "#007AFF",
-    paddingHorizontal: 40,
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingHorizontal: 48,
+    paddingVertical: 16,
+    borderRadius: 12,
+    width: "100%",
+    alignItems: "center",
   },
-  disabled: { backgroundColor: "#999" },
-  authButtonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  error: { color: "red", fontSize: 14, marginTop: 8 },
+  buttonDisabled: { backgroundColor: "#999" },
+  buttonText: { color: "#fff", fontSize: 17, fontWeight: "600" },
+  error: { color: "#FF3B30", fontSize: 14, marginTop: 12, textAlign: "center" },
 });
