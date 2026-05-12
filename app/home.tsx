@@ -76,7 +76,7 @@ function HomeContent() {
       <ApiSwitcher current={source} onChange={setSource} />
       <FlatList
         data={transactions}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `${item.source}-${item.id}`}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.cardTitle} numberOfLines={1}>
